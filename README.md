@@ -11,12 +11,13 @@ Workshop slides: https://docs.google.com/presentation/d/1W75KLs3LvVx4MHmY62QJ6yZ
 
 1. Do you want to design a Bayesian module or a course?
 2. What is the status of (Bayesian) statistics curriculum in your department / institution? Discuss and share experience.
-3. What is the student body you think the module / course will serve?
-4. How much math / probability do you expect to require?
-5. Is it the intro level or intermediate / advanced level?
-6. Do you plan to compare Bayesian to frequentist methods? If so, in what way?
-7. Do you plan to include a project component if it is a Bayesian course? Why or why not?
-8. What are the content challenges you foresee, especially given what’s presented in the workshop?
+3. If it is a Bayesian module, what courses do you plan to add it into?
+4. If it is a Bayesian course, what level(s) do you plan for? Intro, intermediate, or advanced?
+5. What is the student body you think the module / course will serve?
+6. How much math / probability do you expect to require?
+7. Do you plan to compare Bayesian to frequentist methods? If so, in what way?
+8. Do you plan to include a project component if it is a Bayesian course? Why or why not?
+9. What are the content challenges you foresee, especially given what’s presented in the workshop?
 
 #### Section 2: Computing
 
