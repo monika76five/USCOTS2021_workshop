@@ -10,7 +10,7 @@ Workshop slides: https://docs.google.com/presentation/d/1W75KLs3LvVx4MHmY62QJ6yZ
 #### Section 1: Curriculum & content
 
 1. Do you want to design a Bayesian module or a course?
-2. What is the status of (Bayesian) statistics curriculum in your department / institution, discuss and share experience?
+2. What is the status of (Bayesian) statistics curriculum in your department / institution? Discuss and share experience.
 3. What is the student body you think the module / course will serve?
 4. How much math / probability do you expect to require?
 5. Is it the intro level or intermediate / advanced level?
