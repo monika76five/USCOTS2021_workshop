@@ -441,7 +441,7 @@ where $i = 1, \cdots, n_j$ and $n_j$ is the number of observations in group $j$.
 - Second stage: weakly informative hyperpriors for hyperparameters
 \begin{eqnarray}
 \mu &\sim& \textrm{Normal}(3, 1), \\
-\tau &\sim& \textrm{Cauchy}(0, 1).
+\tau &\sim& \textrm{Cauchy}^+(0, 1).
 \end{eqnarray}
 
 - After posterior inference:
@@ -452,7 +452,7 @@ where $i = 1, \cdots, n_j$ and $n_j$ is the number of observations in group $j$.
 
 - Weakly informative prior for $\sigma$:
 \begin{eqnarray}
-\sigma &\sim& \textrm{Cauchy}(0, 1).
+\sigma &\sim& \textrm{Cauchy}^+(0, 1).
 \end{eqnarray}
 
 ```{r  echo = FALSE, fig.height = 3, fig.width = 6, fig.align = "center"}
