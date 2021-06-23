@@ -1,0 +1,650 @@
+---
+title: "Introducing Bayesian Ideas in Intro Stat"
+author: "Kevin Ross"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r, include = FALSE}
+
+library(knitr)
+library(ggplot2)
+library(dplyr)
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+
+options(scipen = 9, digits = 2)
+
+set.seed(21234)
+
+```
+
+
+
+
+
+
+
+# Activity 1: "First" Day of Inference
+
+- Interval estimate for a population proportion
+- Simulation-based
+- No probability background required
+- Could be used on "first" day of inference
+
+
+
+Suppose we're interested in **the proportion of current Cal Poly students who have ever read at least one book in the *Harry Potter* series**, which we'll refer to as the "population proportion".
+
+1. Have you ever read a Harry Potter book?
+
+    *Have students respond, but don't collect data or discuss yet.*
+
+
+1. What are some challenges to computing the population proportion?  How could we *estimate* it?
+
+    *Population versus sample.*
+
+
+1. What are the *possible* values of the population proportion?
+
+    *[0, 1]*
+
+
+1. Which one of the following do you think is the *most plausible* value of the population proportion?  Options: 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.
+
+    *Collect responses in a plot like the following.*
+
+
+    ```{r}
+
+prior_guess = data.frame(theta = 0.1 * rep(1:8,
+                                           c(1, 3, 9, 9, 7, 4, 2, 1)))
+
+ggplot(prior_guess, aes(x = theta)) +
+  geom_dotplot(binwidth = 0.02, fill = "white") +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  scale_x_continuous(name = "Population proportion",
+                     breaks = (0:10) * 0.1,
+                     limits = c(0, 1)) +
+  theme_bw()
+
+```
+
+
+1. What seems to be the consensus of the class?
+What do we think are the most plausible values of the population proportion?
+Somewhat plausible?
+Not plausible?
+
+    *Like a "wisdom of crowds" prior. Most: ~0.3-0.5; somewhat ~0.1-0.2, ~0.6-0.8*
+
+
+1. The plot just shows our *guesses* for the population proportion.
+How could we estimate the actual population proportion based on data?
+
+    *Use our class as a sample.*
+
+
+
+1. We will treat the 35 students in our class as a sample from the population of current Cal Poly students.
+But before collecting the data, let's consider what *might* happen.  
+
+    Suppose that the actual population proportion is 0.5.
+    That is, suppose that 50% of current Cal Poly students have read at least one Harry Potter book.
+    How many students in a class of 35 students would you expect to have read at least one Harry Potter book?
+    Would it necessarily be around 17-18 students?
+    How could you use a coin to *simulate* how many students in a class of 35 students *might* have read at least one Harry Potter book?
+
+
+    *Sampling variability.
+    Can do a coin flipping simulation by hand and collect the results, then use software/applet, e.g. [RossmanChance](http://www.rossmanchance.com/applets/2021/oneprop/OneProp.htm).*
+
+
+1. Now suppose the actual population proportion is 0.1.
+How would the previous part change?
+
+
+    *Now expect around 31-32 but still sampling variability.
+    Can use a ten-sided die to do simulation, then applet.*
+
+
+1. Using your choice for the most plausible value of the population proportion, simulate how many students in a class of 35 students *might* have read at least one Harry Potter book.
+
+    *Each student should do at least two repetitions.
+    Collect values in a plot like the following.*
+
+
+
+    ```{r}
+
+n = 35
+
+theta_sim0 = rep(sample(prior_guess$theta, n, replace = FALSE), 2)
+
+y_sim0 = rbinom(n * 2, n, theta_sim0)
+
+sim0 = data.frame(theta_sim0,
+                  y_sim0)
+
+ggplot(sim0, aes(x = theta_sim0, y = y_sim0)) +
+  geom_jitter(width = 0.02, height = 0, shape = 21) +
+  scale_x_continuous(name = "Population proportion",
+                     breaks = (0:10) * 0.1,
+                     limits = c(0, 1)) +
+  scale_y_continuous(name = "Number of students who have read HP book",
+                     breaks = seq(0, n, 5),
+                     limits = c(0, n)) +
+  theme_bw()
+
+```
+
+1. Why are there more dots corresponding to a proportion of 0.4 than to a proportion of 0.1?
+
+    *Differences in initial plausibility.*
+
+
+1. How could we get an even clearer picture of what *might* happen?
+
+    *Conduct more repetitions, using software.*
+
+
+
+    ```{r}
+
+n_rep = 10000
+
+theta_sim = sample(prior_guess$theta, n_rep, replace = TRUE)
+
+y_sim = rbinom(n_rep, n, theta_sim)
+
+sim = data.frame(theta_sim,
+                 y_sim)
+
+ggplot(sim, aes(x = theta_sim, y = y_sim)) +
+  geom_jitter(width = 0.02, height = 0.02, shape = 21, alpha = 0.5) +
+  scale_x_continuous(name = "Population proportion",
+                     breaks = (0:10) * 0.1,
+                     limits = c(0, 1)) +
+  scale_y_continuous(name = "Number of students who have read HP book",
+                     breaks = seq(0, n, 5),
+                     limits = c(0, n)) +
+  theme_bw()
+
+```
+
+
+1. The plot above illustrates two sources of uncertainty or variability.  What are these two sources?
+
+    *Uncertainty in the value of the population proportion; differences in initial plausibility.
+    For a given population proportion, sample-to-sample variability.*
+
+
+
+1. So far, everything we've considered is what *might* happen in a class of 35 students.
+Now let's see what is actually true for our class.
+(Collect data.)
+Out of the 35 students in our class, 12 have read at least one Harry Potter book, for a proportion of 12/35 = 0.343.
+Does this necessarily mean that 34.3% of current Cal Poly students have read at least one Harry Potter book?
+
+    *Parameter versus statistic.*
+    
+
+1. Remember that we started with *guesses* about which values of the population proportion were more plausible than others.
+How can we reconsider the plausibility of these values in light of our sample data?
+
+    *Previous plots told us what might happen.
+    Let's focus now on what actually did happen.
+    What values of population proportion seem consistent with observing 12 successes?
+    "Slice out" the dots corresponding to 12 successes.*
+
+
+    ```{r, fig.show="hold", out.width="33%"}
+
+y_obs = 12
+
+sim0 = sim0 %>%
+  mutate(given_y_obs = (y_sim0 == y_obs))
+
+ggplot(sim0,
+       aes(x = theta_sim0, y = y_sim0, fill = given_y_obs)) +
+  geom_jitter(width = 0.02, height = 0, shape = 21) +
+  scale_fill_manual(values = c("white", "orange"),
+                    name = "Number of students", labels = c("not 12", "12")) +
+  scale_x_continuous(name = "Population proportion",
+                     breaks = (0:10) * 0.1,
+                     limits = c(0, 1)) +
+  scale_y_continuous(name = "Number of students who have read HP book",
+                     breaks = seq(0, n, 5),
+                     limits = c(0, n)) +
+  theme_bw()
+
+ggplot(sim0,
+       aes(x = theta_sim0, fill = given_y_obs)) +
+  geom_dotplot(binwidth = 0.02) +
+  scale_fill_manual(values = c("white", "orange"),
+                    name = "Number of students", labels = c("not 12", "12")) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  scale_x_continuous(name = "Population proportion",
+                     breaks = (0:10) * 0.1,
+                     limits = c(0, 1)) +
+  theme_bw()
+
+ggplot(sim0 %>%
+         filter(y_sim0 == y_obs),
+       aes(x = theta_sim0)) +
+  geom_dotplot(binwidth = 0.02, fill = "orange") +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  scale_x_continuous(name = "Population proportion",
+                     breaks = (0:10) * 0.1,
+                     limits = c(0, 1)) +
+  theme_bw()
+
+```
+
+
+
+    *Do both for class simulation and software.*
+
+
+
+    ```{r, fig.show="hold", out.width="50%"}
+
+ggplot(sim %>%
+         mutate(given_y_obs = (y_sim == y_obs)),
+       aes(x = theta_sim, y = y_sim, fill = given_y_obs)) +
+  geom_jitter(width = 0.02, height = 0.02, shape = 21, alpha = 0.5) +
+  scale_fill_manual(values = c("white", "orange"),
+                    name = "Number of students", labels = c("not 12", "12")) +
+  scale_x_continuous(name = "Population proportion",
+                     breaks = (0:10) * 0.1,
+                     limits = c(0, 1)) +
+  scale_y_continuous(name = "Number of students who have read HP book",
+                     breaks = seq(0, n, 5),
+                     limits = c(0, n)) +
+  theme_bw()
+
+
+
+
+sim = sim %>%
+  filter(y_sim == y_obs)
+
+plot(table(sim$theta_sim), type = "h", col = "orange",
+     xlab = "Population proportion", xlim = c(0, 1), xaxt = "n",
+     yaxt = "n", ylab = "",
+     main = "Plausibility of values of population proportion given sample data")
+axis(1, (0:10) * 0.1)
+
+```
+
+
+
+
+1. After observing a sample of 35 Cal Poly students with a proportion of 12/35 who have read at least one Harry Potter book, what can we say about the plausible values of the *population* proportion?
+How has our assessment of plausibility changed from before observing the sample data?
+
+    *0.3-0.4 were initially very plausible, and have even greater plausibility now compared to 0.2 and 0.5.
+    Anything outside of 0.2-0.5 seems implausible in light of the sample data.*
+    
+
+
+## Comments on Activity 1
+
+
+- The activity hits on all GAISE guidelines, including multivariable thinking
+- Might be confusing to collect from students both their guess and their response.
+    - Could use previous survey results to motivate prior for Cal Poly, and then use sample data from the class
+    - Or could use class prior, but a different sample
+- Use an example where you expect a relatively diffuse prior
+- Lots of follow up questions/directions
+- Compare to population proportion who have watched at least one HP movie (would expect prior to have greater prior mean but smaller prior SD)
+
+
+
+
+
+# Activity 2: "Second" Day of Inference
+
+
+- Continuing Activity 1, construct prior via relative plausibility
+- Some of the math behind the simulation, but Bayes rule without probability
+- Introduces the Bayesian inference framework
+    - Parameters are random variables with distributions that quantify degree of uncertainty
+    - Posterior is proportional to likelihood times prior
+- Discrete to continuous prior
+
+
+Continuing the HP problem.
+
+1. We'll start by considering only the values 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 as initially plausible for the population proportion.
+Suppose that before collecting sample data, our *prior* assessment is that:
+
+    - 0.2 is three times more plausible than 0.1
+    - 0.3 is three times more plausible than 0.2
+    - 0.3 and 0.4 are equally plausible
+    - 0.2 and 0.5 are equally plausible
+    - 0.1 and 0.6 are equally plausible
+
+    Sketch a plot of this *prior distribution*.
+
+
+    *Can talk about what we mean by prior distribution.
+    Considering parameter as a random variable, and using distributions to describe degree of uncertainty.*
+
+
+1. If we simulate many values of the population proportion according to the above distribution, on what proportion of repetitions would we expect to see a value of 0.1?
+If we conduct 260000 repetitions of the simulation, on how many repetitions would we expect to see a value of 0.1?
+Repeat for the other plausible values to make a table of what we would expect the simulation results to look like.
+(For now, we're ignoring simulation variability.)
+
+
+    ```{r}
+
+theta = (1:6) * 0.1
+
+units = c(1, 3, 9, 9, 3, 1)
+
+prior = units / sum(units)
+
+n_reps = 260000
+
+bayes_table = data.frame(theta, units, prior, prior_reps = prior * n_reps)
+
+kable(bayes_table,
+      align = "r",
+      col.names = c("Population proportion", "Prior \"Units\" ", "Prior", "Number of reps"),
+      booktabs = TRUE,
+      digits = 4
+)
+
+```
+
+
+1. The above describes our initial assessment of the population proportion prior to observing data.
+Now suppose we observe a sample of 35 students in which 12 students have read at least one HP book.
+We want to update our assessment of the population proportion in light of the observed data.
+
+    Suppose that the actual population proportion is 0.5.
+    How could we determine the chances of observing 12 students who have read at least one HP book in a sample of 35 students?
+
+    *Can use simulation/applet.
+    Can mention that there is a formula (Binomial) for this situation.*
+    
+    ```{r}
+
+n = 35
+
+y_obs = 12
+
+dbinom(y_obs, n, 0.5)
+```
+
+
+
+1. Recall the simulation with 260000 repetitions that we started above.
+Consider the 30000 repetitions in which the population proportion is 0.5.
+Suppose that for each of these repetitions we simulate the number of students in a class of 35 who have read at least one HP book. 
+On what proportion of these repetitions would we expect to see a sample count of 12?
+On how many of these 30000 repetitions would we expect to see a sample count of 12?
+
+    ```{r}
+round(30000 * dbinom(y_obs, n, 0.5), 0)
+```
+
+1. Repeat the previous part for the plausible values of the population proportion.
+
+    ```{r}
+
+bayes_table = bayes_table %>%
+  mutate(likelihood = dbinom(y_obs, n, theta),
+         product = round(prior_reps * likelihood, 0))
+
+kable(bayes_table,
+      align = "r",
+      col.names = c("Population proportion", "Prior \"Units\" ", "Prior", "Number of reps",
+                    "Chances of count of 12", "Reps with count of 12"),
+      booktabs = TRUE,
+      digits = 4
+)
+
+```
+
+1. Consider just the `r sum(bayes_table$product)` repetitions that resulted in a simulated sample count of 12.
+What proportion of these repetitions correspond to a population proportion of 0.4?
+Of 0.5?
+Sketch this *posterior distribution*.
+
+
+
+    ```{r}
+
+bayes_table = bayes_table %>%
+  mutate(posterior = prior * likelihood / sum(prior * likelihood))
+
+kable(bayes_table,
+      align = "r",
+      col.names = c("Population proportion", "Prior \"Units\" ", "Prior", "Number of reps",
+                    "Chances of count of 12", "Reps with count of 12",
+                    "Posterior"),
+      booktabs = TRUE,
+      digits = 4
+)
+
+```
+
+1. After observing a sample of 35 Cal Poly students with a proportion of 12/35 who have read at least one Harry Potter book, what can we say about the plausible values of the *population* proportion?
+How has our assessment of plausibility changed from before observing the sample data?
+
+    *Compare posterior to prior, similar to Activity 1.*
+    
+
+1. Prior to observing data, how many times more plausible is 0.4 than 0.5 for the population proportion?
+How many times more likely is a count of 12 in a sample of size 35 when the population proportion is 0.4 than when it is 0.5?
+After observing data, how many times more plausible is 0.4 than 0.5 for the population proportion?
+How are these three values related?
+
+    \begin{align*}
+    \left(\frac{9/26}{3/26}\right) \times \left(\frac{0.1106}{0.0242}\right) & = \frac{0.4478}{0.0328}\\
+    3 \times 4.55 & = 13.66
+    \end{align*}
+
+    *Posterior is proportional to product of prior and likelihood.*
+
+    
+1. What is the problem with considering only the values 0.1, 0.2, ..., 0.6 as plausible?
+How could we resolve this issue?
+
+    *Expand the grid and assign relative plausibility to the in between values.
+    Connect the dots to move to continuous prior.*
+
+
+
+1. Suppose we have a prior distribution that assigns initial relative plausibility to a fine grid of possible values of the population proportion, e.g., 0, 0.0001, 0.0002, 0.0003, ..., 0.9999, 1.
+If we observe a count of 12 in a sample of size 35, how could we update the relative plausibility to find a posterior distribution for the population proportion?
+
+
+    *For each potential value of the parameter, find probability of observing a count of 12 in a sample of size 35 (likelihood).
+    Find product of prior and likelihood to obtain posterior relative plausibility.
+    Rescale to sum to 1.*
+
+
+    ```{r, echo = FALSE}
+# prior
+theta = seq(0, 1, 0.0001)
+prior = dbeta(theta, 4.6, 8.4)
+prior = prior / sum(prior)
+
+# data
+n = 35 # sample size
+y = 12 # sample count of success
+
+# likelihood, using binomial
+likelihood = dbinom(y, n, theta) # function of theta
+
+# posterior
+product = likelihood * prior
+posterior = product / sum(product)
+
+# plot
+ylim = c(0, max(c(prior, posterior, likelihood / sum(likelihood))))
+plot(theta, prior, type='l', xlim=c(0, 1), ylim=ylim, col="orange", xlab='theta', ylab='', yaxt='n')
+par(new=T) 
+plot(theta, likelihood/sum(likelihood), type='l', xlim=c(0, 1), ylim=ylim, col="skyblue", xlab='', ylab='', yaxt='n')
+par(new=T)
+plot(theta, posterior, type='l', xlim=c(0, 1), ylim=ylim, col="seagreen", xlab='', ylab='', yaxt='n')
+legend("topright", c("prior", "(scaled) likelihood", "posterior"), lty=1, col=c("orange", "skyblue", "seagreen"))
+
+```
+
+
+
+1. How could we use the posterior distribution to fill in the blank in the following: "There is a 90% chance that fewer than [blank] percent of current Cal Poly students have read at least one HP book."
+
+
+    *Given the posterior distribution, simulate values of the parameter (according to the posterior) and use the simulated values to approximate posterior probabilities, credible intervals, mean, SD, etc.
+    Ask a series of questions to summarize and report conclusions based on the posterior distribution.*
+
+
+    ```{r, echo = TRUE}
+post_sim = sample(theta, 10000, replace = TRUE, prob = posterior)
+
+hist(post_sim,
+     xlab = "Population proportion",
+     ylab = "", yaxt = "n",
+     main = "Posterior distribution")
+
+quantile(post_sim, 0.9)
+
+mean(post_sim < 0.5)
+
+```
+
+
+## Comments on Activity 2
+
+- Use counts instead of proportions.
+- Don't have to avoid probability entirely, but you can avoid a lot of it if you want.
+- Regarding prior/posterior, "plausible" maybe not the best word; "likely" instead?
+- Lots of "proportions" and lots of stages to the simulation.
+    - Use frequent reminders of what each proportion is, and what is happening at each stage of the simulation.
+- Choose better values for the small discrete prior probabilities to match with the eventual continuous prior (e.g., proportional to dbeta(theta, a, b).)
+- In Bayesian inference, the entire posterior distribution is the inference.
+    - Try not to just summarize the posterior in a single interval or posterior probability.
+    - Instead report, say, a collection of intervals (50%, 80%, 95%, etc)
+- Be sure to spend ample time on the data and conclusions, not just the analysis.
+
+
+
+
+# Activity 3: "End" of Course
+
+- After frequentist, why Bayesian?
+
+
+You have two friends, Mabel and Dipper, who each makes a claim.
+
+Mabel says: "I've been learning to use the Force! (Like in Star Wars.)
+If you roll a fair four-sided die, I can [use the Force to make it land on a 1](https://www.starwars.com/video/a-game-of-chance)!
+I'm still learning, so I can't do it every time, but it definitely works sometimes!"
+
+Dipper, a baseball player, says: "Ever since baseball season ended, I've been practicing really hard to improve my hitting.
+Last season I got hits in 25% of my at bats, but I've definitely improved since then."
+
+Before reading further, stop to consider: whose claim - Mabel's or Dipper's - is initially more convincing?
+Or are you equally convinced? Why?
+(To put it another way, whose claim are you initially more skeptical of?
+Or are you equally skeptical?)
+(To put it one more way, whose claim would require more data to convince you?)
+
+ 
+
+You decide to collect some data from Mabel and Dipper to investigate their claims.
+
+To investigate Mabel's claim you roll a fair four-sided die and have Mabel use the Force to make the die land on 1.
+After 100 rolls, the die has landed on 1 33 times.
+(You can assume the die is fair, the rolls are independent, and there is no funny business in data collection (other than Mabel's use of the Force).)
+
+To investigate Dipper's claim you have him take a series of at bats.
+After 100 at bats, Dipper has gotten 33 hits.
+(You can assume Dipper's probability of getting a hit on any single at bat is the same for each at bat, the at bats are independent, you can ignore baseball context like walks/etc., and there is no funny business in data collection.) 
+
+1. Use the results of the 100 trials to conduct a null hypothesis test for Mabel and compute the p-value.
+1. Repeat the previous part for Dipper.
+1. Based on the results of the hypothesis tests, whose claim - Mabel's or Dipper's - is more convincing?
+Or are you equally convinced? Why?
+1. Now use the results of the 100 trials to perform a Bayesian analysis for Mabel.
+Be sure to specify your prior distribution and explain why you chose that prior.
+Find and interpret the posterior distribution and assess the plausibility of Mabel's claim.
+1. Repeat the previous part for Dipper.
+1. Based on the results of the Bayesian analyses, whose claim - Mabel's or Dipper's - is more convincing? Or are you equally convinced? Why?
+1. In this situation, which analysis do you prefer: the frequentist analysis or the Bayesian analysis?  Why?
+There is no right or wrong answer to this question, but you should state a clear preference and explain why it is more appealing to you.
+
+
+```{r, echo=FALSE, fig.show="hold", out.width="50%"}
+
+theta <- seq(0.2, 0.35, length = 10000)
+
+# prior
+
+a_m = 2500
+b_m = 7500
+pi_m = dbeta(theta, a_m, b_m)
+
+a_b = 90
+b_b = 270
+pi_b = dbeta(theta, a_b, b_b)
+
+plot(theta, pi_m, type = "l", lty = 1, lwd = 2, col = "orange",
+     xlab = "Population proportion",
+     ylab = "Density",
+     yaxt = "n",
+     main = "Prior distributions")
+
+lines(theta, pi_b, lwd = 2, col = "skyblue")
+
+legend("topright", c("Mabel", "Dipper"), lty = c(1, 1), lwd = c(2, 2),
+       col = c("orange", "skyblue"))
+
+# posterior
+n = 100
+y_b = 33
+y_m = 33
+
+a_b1 = a_b + y_b
+b_b1 = b_b + n - y_b
+pi_b1 = dbeta(theta, a_b1, b_b1)
+
+a_m1 = a_m + y_m
+b_m1 = b_m + n - y_m
+pi_m1 = dbeta(theta, a_m1, b_m1)
+
+plot(theta, pi_m1, type = "l", lty = 1, lwd = 2, col = "orange",
+     xlab = "Population proportion",
+     ylab = "Density",
+     yaxt = "n",
+     main = "Posterior distributions")
+
+lines(theta, pi_b1, lwd = 2, col = "skyblue")
+lines(theta, pi_m, lwd = 1, lty = 2, col = "orange")
+lines(theta, pi_b, lwd = 1, lty = 2, col = "skyblue")
+
+legend("topright",
+       c("Mabel (posterior)", "Dipper (posterior)", "Mabel (prior)", "Dipper (prior)"),
+       lty = c(1, 1, 2, 2), lwd = c(2, 2, 1, 1),
+       col = rep(c("orange", "skyblue"), 2))
+
+
+```
+
+
+## Comments on Activity 3
+
+- Where to start depends on what Bayesian ideas you have already introduced.
+- Can discuss what would be a meaningful difference, rather than just $p>0.25$.
+- Compare posterior probabilities or intervals between Mabel and Dipper.
+- Bayesian versus frequentist is not "right versus wrong" but rather different sets of tools.
+
+
