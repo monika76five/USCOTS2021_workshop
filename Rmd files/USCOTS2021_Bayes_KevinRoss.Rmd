@@ -106,7 +106,7 @@ But before collecting the data, let's consider what *might* happen.
 How would the previous part change?
 
 
-    *Now expect around 31-32 but still sampling variability.
+    *Now expect around 3-4 but still sampling variability.
     Can use a ten-sided die to do simulation, then applet.*
 
 
@@ -177,8 +177,8 @@ ggplot(sim, aes(x = theta_sim, y = y_sim)) +
 
 12. The plot above illustrates two sources of uncertainty or variability.  What are these two sources?
 
-    *(1) Uncertainty in the value of the population proportion; differences in initial plausibility.
-    (2) For a given population proportion, sample-to-sample variability.*
+    *(1) Uncertainty in the value of the population proportion; differences in initial plausibility.*
+    *(2) For a given population proportion, sample-to-sample variability.*
 
 
 
@@ -328,6 +328,17 @@ Suppose that before collecting sample data, our *prior* assessment is that:
     - 0.1 and 0.6 are equally plausible
 
     Sketch a plot of this *prior distribution*.
+
+
+    ```{r}
+
+theta0 = (1:6) * 0.1
+prior0 = c(1, 3, 9, 9, 3, 1) / 26
+
+plot(theta0, prior0, type = "h", col = "orange", lwd = 3,
+     yaxt = "n", ylab = "", xlab = "Population proportion")
+
+```
 
 
     *Can talk about what we mean by prior distribution.
@@ -553,9 +564,9 @@ ggplot(post_sim, aes(theta_sim)) +
        title = "Posterior distribution") +
   theme_bw()
 
-quantile(post_sim$theta, 0.9)
+quantile(post_sim$theta_sim, 0.9)
 
-mean(post_sim$theta < 0.5)
+mean(post_sim$theta_sim < 0.5)
 
 ```
 
